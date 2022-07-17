@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: master
+resources:
+- manifests/deployment.yaml
+- manifests/analysistemplate.yaml
+- manifests/service.yaml
+- manifests/daily-todo.yaml
+- manifests/image-volume-claim.yaml
+- manifests/postgres-config.yaml
+- manifests/postgres.yaml
+- manifests/ingress.yaml
+images:
+- name: gcr.io/PROJECT/BACKEND
+  newName: gcr.io/devops-with-kubernetes-355207/todo-app
+  newTag: master-c25489478a38dbeaac876934ae8e7c516ac09c20
+- name: gcr.io/PROJECT/BROADCASTER
+  newName: gcr.io/devops-with-kubernetes-355207/broadcaster
+  newTag: master-c25489478a38dbeaac876934ae8e7c516ac09c20
+- name: gcr.io/PROJECT/DAILY
+  newName: gcr.io/devops-with-kubernetes-355207/daily-todo
+  newTag: master-c25489478a38dbeaac876934ae8e7c516ac09c20
+secretGenerator:
+- envs:
+  - .env.secret
+  name: postgres-password

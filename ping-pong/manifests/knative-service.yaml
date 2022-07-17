@@ -1,0 +1,20 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ping-pong-serverless
+  namespace: log-apps
+spec:
+  template:
+    metadata:
+      name: ping-pong-serverless-v5
+    spec:
+      containers:
+        - image: thesamsai/ping-pong:v5
+          env:
+            - name: POSTGRES
+              value: "postgres-svc/pingpong"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-password
+                  key: POSTGRES_PASSWORD

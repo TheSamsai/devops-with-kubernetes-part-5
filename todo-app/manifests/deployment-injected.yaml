@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-dep
+  namespace: todo-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: todo-app
+    spec:
+      containers:
+      - env:
+        - name: IMAGE_DIR
+          value: /shared/image
+        - name: POSTGRES
+          valueFrom:
+            configMapKeyRef:
+              key: postgres-host
+              name: postgres-config
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: postgres-password-fd8httt8gd
+        - name: NATS_URL
+          value: nats://my-nats.default.svc.cluster.local:4222
+        image: gcr.io/PROJECT/BACKEND
+        name: todo-app
+        resources:
+          limits:
+            cpu: 10m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /shared/image
+          name: image-volume
+      - env:
+        - name: NATS_URL
+          value: nats://my-nats.default.svc.cluster.local:4222
+        - name: WEBHOOK_URL
+          value: https://nats.requestcatcher.com/test
+        image: gcr.io/PROJECT/BROADCASTER
+        name: broadcaster
+        resources:
+          limits:
+            cpu: 10m
+            memory: 50Mi
+      volumes:
+      - name: image-volume
+        persistentVolumeClaim:
+          claimName: image-claim
+---
